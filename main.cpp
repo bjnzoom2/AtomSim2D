@@ -8,7 +8,7 @@
 #include "gl2d.h"
 
 struct gameData {
-
+	
 };
 
 gl2d::Renderer2D renderer;
