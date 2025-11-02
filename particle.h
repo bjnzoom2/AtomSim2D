@@ -40,11 +40,14 @@ public:
 		renderer.renderCircleOutline(position, size, color, 3, 100);
 	}
 
-	void getAccumulatedForce(double COULOMBCONST, Particle& otherParticle) {
+	void getAccumulatedForce(const double *CONST, Particle& otherParticle) {
 		glm::dvec2 direction = glm::normalize(otherParticle.position - position);
 		double distance = glm::distance(position, otherParticle.position);
 
-		double Fmag = COULOMBCONST * (chargeMag * -otherParticle.chargeMag / (distance * distance) * 1e9);
+		double Fgrav = CONST[0] * (mass * otherParticle.mass / (distance * distance) * 1e9);
+		double Felec = CONST[1] * (chargeMag * -otherParticle.chargeMag / (distance * distance) * 1e9);
+
+		double Fmag = Fgrav + Felec;
 		accumulatedForce += direction * Fmag;
 	}
 

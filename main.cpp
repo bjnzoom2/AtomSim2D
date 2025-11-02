@@ -9,7 +9,7 @@
 #include "particle.h"
 
 struct gameData {
-	const double COULOMBCONST = 8.99e9;
+	const double CONSTS[4] = { 6.67430e-11, 8.99e9 };
 	float timer = 0.2;
 
 	std::vector<Particle> particles = {};
@@ -58,7 +58,7 @@ bool gameLogic(GLFWwindow* window, float deltatime) {
 			if (i == j) {
 				continue;
 			}
-			data.particles[i].getAccumulatedForce(data.COULOMBCONST, data.particles[j]);
+			data.particles[i].getAccumulatedForce(data.CONSTS, data.particles[j]);
 		}
 	}
 
