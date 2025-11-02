@@ -6,18 +6,60 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include "gl2d.h"
+#include "particle.h"
 
 struct gameData {
-	
+	float timer = 0.2;
+
+	std::vector<Particle> particles = {};
+	glm::dvec2 cursorPos = {};
 };
 
 gl2d::Renderer2D renderer;
+gameData data;
 
 unsigned int windowWidth = 800;
 unsigned int windowHeight = 800;
 
-bool gameLogic() {
-	
+bool gameLogic(GLFWwindow* window, float deltatime) {
+	glViewport(0, 0, windowWidth, windowHeight);
+	glClear(GL_COLOR_BUFFER_BIT);
+	renderer.updateWindowMetrics(windowWidth, windowHeight);
+	renderer.clearScreen({ 0.0f, 0.0f, 0.0f, 0.0f });
+	data.timer += deltatime;
+
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && data.timer > 0.2) {
+		glfwGetCursorPos(window, &data.cursorPos.x, &data.cursorPos.y);
+		Particle part(data.cursorPos, { 0, 0 }, 1);
+		data.particles.push_back(part);
+		data.timer = 0;
+	}
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && data.timer > 0.2) {
+		glfwGetCursorPos(window, &data.cursorPos.x, &data.cursorPos.y);
+		Particle part(data.cursorPos, { 0, 0 }, 0);
+		data.particles.push_back(part);
+		data.timer = 0;
+	}
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && data.timer > 0.2) {
+		glfwGetCursorPos(window, &data.cursorPos.x, &data.cursorPos.y);
+		Particle part(data.cursorPos, { 0, 0 }, -1);
+		data.particles.push_back(part);
+		data.timer = 0;
+	}
+
+	for (int i = 0; i < data.particles.size(); i++) {
+		data.particles[i].render(renderer);
+	}
+
+	renderer.flush();
+
+	glfwSwapBuffers(window);
+	glfwPollEvents();
+
 	return true;
 }
 
@@ -43,9 +85,17 @@ int main() {
 	gl2d::init();
 	renderer.create();
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+	float deltatime = 0;
+	float lastframe = 0;
+
 	while (!glfwWindowShouldClose(window)) {
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		float currentframe = glfwGetTime();
+		deltatime = currentframe - lastframe;
+		lastframe = currentframe;
+
+		gameLogic(window, deltatime);
 	}
 
 	renderer.cleanup();
