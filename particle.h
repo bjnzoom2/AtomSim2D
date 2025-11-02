@@ -1,4 +1,5 @@
 #include "gl2d.h"
+#include <iostream>
 
 class Particle {
 public:
@@ -20,6 +21,7 @@ public:
 				size = 10;
 				break;
 		}
+		chargeMag = charge * 1.602e-19;
 	};
 
 	glm::dvec2 position = { 400, 400 };
@@ -27,6 +29,7 @@ public:
 	glm::dvec2 velocity = {};
 
 	int charge;
+	double chargeMag;
 	double mass;
 
 	glm::dvec2 accumulatedForce = {};
@@ -35,5 +38,22 @@ public:
 
 	void render(gl2d::Renderer2D& renderer) {
 		renderer.renderCircleOutline(position, size, color, 3, 100);
+	}
+
+	void getAccumulatedForce(double COULOMBCONST, Particle& otherParticle) {
+		glm::dvec2 direction = glm::normalize(otherParticle.position - position);
+		double distance = glm::distance(position, otherParticle.position);
+
+		double Fmag = COULOMBCONST * (chargeMag * -otherParticle.chargeMag / (distance * distance) * 1e9);
+		accumulatedForce += direction * Fmag;
+	}
+
+	void step(float deltatime) {
+		glm::dvec2 accel = accumulatedForce / mass;
+
+		velocity += accel * (double)deltatime;
+		position += velocity * (double)deltatime;
+
+		accumulatedForce = glm::dvec2(0);
 	}
 };

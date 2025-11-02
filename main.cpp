@@ -9,6 +9,7 @@
 #include "particle.h"
 
 struct gameData {
+	const double COULOMBCONST = 8.99e9;
 	float timer = 0.2;
 
 	std::vector<Particle> particles = {};
@@ -53,6 +54,16 @@ bool gameLogic(GLFWwindow* window, float deltatime) {
 
 	for (int i = 0; i < data.particles.size(); i++) {
 		data.particles[i].render(renderer);
+		for (int j = 0; j < data.particles.size(); j++) {
+			if (i == j) {
+				continue;
+			}
+			data.particles[i].getAccumulatedForce(data.COULOMBCONST, data.particles[j]);
+		}
+	}
+
+	for (int i = 0; i < data.particles.size(); i++) {
+		data.particles[i].step(deltatime);
 	}
 
 	renderer.flush();
