@@ -2,6 +2,25 @@
 #include <iostream>
 
 class Particle {
+private:
+	double getStrongForce(double distance) {
+		const double repel_MeV = 90.0;
+		const double attract_MeV = 40.0;
+		const double repelRange_nm = 35;
+		const double attractRange_nm = 10;
+		const double MeV_to_J = 1.602176634e-13;
+		double repel_J = repel_MeV * MeV_to_J;
+		double attract_J = attract_MeV * MeV_to_J;
+		double repelRange_m = repelRange_nm * 1e9;
+		double attractRange_m = attractRange_nm * 1e9;
+
+		double Frep = (repel_J / repelRange_m) * std::exp(-distance / repelRange_nm);
+		double Fatt = (attract_J / attractRange_m) * std::exp(-distance / attractRange_nm);
+		double Fstrong = Frep - Fatt;
+
+		return Fstrong;
+	}
+
 public:
 	Particle(glm::dvec2 particlePos, glm::dvec2 particleVelocity, int particleCharge) : position(particlePos), velocity(particleVelocity), charge(particleCharge) {
 		switch (charge) {
@@ -47,7 +66,12 @@ public:
 		double Fgrav = CONST[0] * (mass * otherParticle.mass / (distance * distance) * 1e9);
 		double Felec = CONST[1] * (chargeMag * -otherParticle.chargeMag / (distance * distance) * 1e9);
 
-		double Fmag = Fgrav + Felec;
+		double Fstrong = 0;
+		if (charge != -1) {
+			Fstrong = getStrongForce(distance);
+		}
+
+		double Fmag = Fgrav + Felec + Fstrong;
 		accumulatedForce += direction * Fmag;
 	}
 
